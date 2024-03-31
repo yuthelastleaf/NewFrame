@@ -1,0 +1,50 @@
+cmake_minimum_required(VERSION 3.10)
+project(TransVideo)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Set this to your FFmpeg include directory
+set(FFMPEG_INCLUDE_DIR ../../ffmpeg_install/include)
+
+# Set this to your FFmpeg lib directory
+set(FFMPEG_LIB_DIR ../../../ffmpeg_install/bin)
+set(FFMPEG_DEV_ROOT ../../ThirdLib/ffmpeg_install)
+# Set x264 library directorys
+set(X264_LIB_DIR ../../../ThirdLib/x264_install/bin)
+
+include_directories(${FFMPEG_INCLUDE_DIR})
+link_directories(${FFMPEG_DEV_ROOT}/bin)
+
+add_executable(trans_video main.cpp)
+
+# Specify the static libraries from FFmpeg you're linking against
+target_link_libraries(trans_video 
+    avformat
+    avcodec
+    avutil
+    swresample
+    # Add any other FFmpeg libraries you need here
+)
+
+# 在 Windows 上，复制 FFmpeg 的 DLLs 到可执行文件同一目录
+if(WIN32)
+    add_custom_command(TARGET trans_video POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FFMPEG_LIB_DIR}/avcodec-60.dll"
+        "${FFMPEG_LIB_DIR}/avformat-60.dll"
+        "${FFMPEG_LIB_DIR}/avutil-58.dll"
+        "${X264_LIB_DIR}/libx264-164.dll"
+        "${FFMPEG_LIB_DIR}/swresample-4.dll"
+        $<TARGET_FILE_DIR:trans_video>)
+endif()
+
+# If you're using MSVC, you might need to suppress some warnings or set specific compiler options
+if(MSVC)
+    # 仅对 MSVC 编译器
+    target_compile_options(trans_video PRIVATE /W3)
+else()
+    # 对 GCC 或 Clang 等其他编译器
+    target_compile_options(trans_video PRIVATE -Wall -Wextra)
+endif()
+

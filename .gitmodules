@@ -1,0 +1,6 @@
+[submodule "ThirdLib/ffmpeg"]
+	path = ThirdLib/ffmpeg
+	url = https://github.com/FFmpeg/FFmpeg.git
+[submodule "ThirdLib/x264"]
+	path = ThirdLib/x264
+	url = https://code.videolan.org/videolan/x264.git

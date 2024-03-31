@@ -1,0 +1,48 @@
+cmake_minimum_required(VERSION 3.10)
+project(ReadVideoInfo)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Set this to your FFmpeg include directory
+set(FFMPEG_INCLUDE_DIR ../../ThirdLib/ffmpeg_install/include)
+
+# Set this to your FFmpeg lib directory
+set(FFMPEG_LIB_DIR ../../../ThirdLib/ffmpeg_install/bin)
+
+# Set x264 library directorys
+set(X264_LIB_DIR ../../../ThirdLib/x264_install/bin)
+
+include_directories(${FFMPEG_INCLUDE_DIR})
+
+add_executable(read_video_info main.cpp)
+
+# Specify the static libraries from FFmpeg you're linking against
+target_link_libraries(read_video_info 
+    ${FFMPEG_LIB_DIR}/avformat
+    ${FFMPEG_LIB_DIR}/avcodec
+    ${FFMPEG_LIB_DIR}/avutil
+    # Add any other FFmpeg libraries you need here
+)
+
+# 在 Windows 上，复制 FFmpeg 的 DLLs 到可执行文件同一目录
+if(WIN32)
+    add_custom_command(TARGET read_video_info POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FFMPEG_LIB_DIR}/avcodec-60.dll"
+        "${FFMPEG_LIB_DIR}/avformat-60.dll"
+        "${FFMPEG_LIB_DIR}/avutil-58.dll"
+        "${X264_LIB_DIR}/libx264-164.dll"
+        "${FFMPEG_LIB_DIR}/swresample-4.dll"
+        $<TARGET_FILE_DIR:read_video_info>)
+endif()
+
+# If you're using MSVC, you might need to suppress some warnings or set specific compiler options
+if(MSVC)
+    # 仅对 MSVC 编译器
+    target_compile_options(read_video_info PRIVATE /W3)
+else()
+    # 对 GCC 或 Clang 等其他编译器
+    target_compile_options(read_video_info PRIVATE -Wall -Wextra)
+endif()
+
