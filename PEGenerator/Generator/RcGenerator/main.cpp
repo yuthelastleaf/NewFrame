@@ -7,7 +7,7 @@
 #include <codecvt>
 
 bool ExtractResource(const HINSTANCE hInstance, const WORD resourceID, const LPCWSTR outputPath) {
-    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resourceID), L"RCDATA");
+    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resourceID), RT_RCDATA);
     if (hRes == NULL) {
         return false; // 资源未找到
     }

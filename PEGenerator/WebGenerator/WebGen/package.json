@@ -1,0 +1,22 @@
+{
+  "name": "webgen",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "element-plus": "^2.6.3",
+    "gojs": "^2.3.16",
+    "jointjs": "^3.7.7",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.2.0"
+  }
+}
