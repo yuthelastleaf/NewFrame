@@ -99,8 +99,18 @@ export class PegenGraph {
             ]
         });
 
-    
-        
+        this.pg_graph.on('add', function (cell) {
+            if (cell.isLink()) {
+                var source = cell.get('source');
+                if (source.portBody.portid === 'portin') {
+                    // 这里可以确定这个链接是从id为uniquePortId1的端口开始的
+                    console.log('port in !');
+                }
+            }
+        });
+
+
+
         // pg_paper.on('element:mouseenter', function (elementView) {
         //     elementView.showTools();
         // });
@@ -112,7 +122,7 @@ export class PegenGraph {
 
     }
 
-    addElement(eposx = 275, eposy = 50) {
+    addElement(eposx, eposy) {
         var portsIn = {
             position: {
                 name: 'left'
@@ -122,7 +132,8 @@ export class PegenGraph {
                     magnet: true,
                     r: 5,
                     fill: '#023047',
-                    stroke: '#023047'
+                    stroke: '#023047',
+                    portid: 'portin'
                 }
             },
             label: {
@@ -178,6 +189,8 @@ export class PegenGraph {
             attrs: {
                 body: {
                     fill: '#8ECAE6',
+                    rx: 10,
+                    ry: 10,
                 },
                 label: {
                     text: 'Model',
@@ -196,11 +209,7 @@ export class PegenGraph {
         model.addPorts([
             {
                 group: 'in',
-                attrs: { label: { text: 'in1' } }
-            },
-            {
-                group: 'in',
-                attrs: { label: { text: 'in2' } }
+                attrs: { label: { text: 'in' } }
             },
             {
                 group: 'out',
