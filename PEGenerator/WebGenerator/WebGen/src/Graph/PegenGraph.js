@@ -12,8 +12,6 @@ export class PegenGraph {
             return PegenGraph.instance;
         }
         PegenGraph.instance = this;
-        // 初始化操作
-        this.data = {}; // 示例属性
     }
 
     init(pg_div) {
@@ -114,7 +112,7 @@ export class PegenGraph {
 
     }
 
-    addElement() {
+    addElement(eposx = 275, eposy = 50) {
         var portsIn = {
             position: {
                 name: 'left'
@@ -175,7 +173,7 @@ export class PegenGraph {
         };
 
         var model = new joint.shapes.standard.Rectangle({
-            position: { x: 275, y: 50 },
+            position: { x: eposx, y: eposy },
             size: { width: 90, height: 90 },
             attrs: {
                 body: {
