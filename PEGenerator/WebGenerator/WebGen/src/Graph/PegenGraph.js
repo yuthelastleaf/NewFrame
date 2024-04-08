@@ -1,4 +1,5 @@
 import * as joint from 'jointjs';
+import { RegELement } from './RegELement.js';
 
 export class PegenGraph {
     static instance;
@@ -15,6 +16,21 @@ export class PegenGraph {
     }
 
     init(pg_div) {
+
+        const RegELementView = joint.dia.ElementView.extend({
+
+            events: {
+                // Name of event + CSS selector : custom view method name
+                'input input': 'onInput'
+            },
+
+            onInput: function (evt) {
+                console.log('Input Value:', evt.target.value);
+                this.model.attr('name/props/value', evt.target.value);
+            }
+        });
+
+
 
         var CustomTextElement = joint.dia.Element.define('examples.CustomTextElement', {
             attrs: {
@@ -72,6 +88,14 @@ export class PegenGraph {
 
         this.pg_namespace = joint.shapes;
         this.pg_namespace.CustomTextElement = CustomTextElement;
+
+        Object.assign(this.pg_namespace, {
+            example: {
+                RegELement,
+                RegELementView
+            }
+        });
+
         this.pg_graph = new joint.dia.Graph({}, { cellNamespace: this.pg_namespace });
         const prect = pg_div.value.getBoundingClientRect();
         this.pg_paper = new joint.dia.Paper({
@@ -259,6 +283,13 @@ export class PegenGraph {
 
         // var elementView = model.findView(this.pg_paper);
         // elementView.addTools(this.pg_toolview);
+    }
+
+    addRegElement(eposx, eposy) {
+        const regELement = new RegELement();
+        regELement.position(eposx, eposy);
+        regELement.resize(200, 120);
+        regELement.addTo(this.pg_graph);
     }
 
     // 其他方法...

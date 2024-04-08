@@ -6,7 +6,7 @@
         <ul>
             <li @click="menuAction('action1')">操作 1</li>
             <li @click="menuAction('action2')">操作 2</li>
-            <li @click="menuAction('action3')">操作 3</li>
+            <li @click="menuRegAction('action3')">操作 3</li>
         </ul>
     </div>
     <el-button type="primary" style="height: 5%;" @click="handleClick">点击我</el-button>
@@ -35,6 +35,17 @@ const menuAction = (action) => {
     const rect = graphDiv.value.getBoundingClientRect();
 
     pegen_graph.addElement(menuPosition.value.x - window.scrollX - rect.left,
+     menuPosition.value.y - rect.top - window.scrollY);
+    menuVisible.value = false;
+};
+
+const menuRegAction = (action) => {
+    console.log(`${action} 被点击了`);
+
+    // 获取JointJS容器的位置
+    const rect = graphDiv.value.getBoundingClientRect();
+
+    pegen_graph.addRegElement(menuPosition.value.x - window.scrollX - rect.left,
      menuPosition.value.y - rect.top - window.scrollY);
     menuVisible.value = false;
 };
