@@ -84,7 +84,28 @@ export class PegenGraph {
             background: {
                 color: 'rgba(0, 255, 0, 0.3)'
             },
-            cellViewNamespace: this.pg_namespace
+            cellViewNamespace: this.pg_namespace,
+            defaultLink: () => new joint.shapes.standard.Link({
+                attrs: {
+                    wrapper: {
+                        cursor: 'default'
+                    }
+                }
+            }),
+            linkPinning: false,
+            validateConnection: function (cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
+                // Prevent linking from output ports to input ports within one element
+                if (cellViewS === cellViewT) return false;
+                // Prevent linking to output ports
+                return magnetT && magnetT.getAttribute('port-group') === 'in';
+            },
+            validateMagnet: function (cellView, magnet) {
+                // Note that this is the default behaviour. It is shown for reference purposes.
+                // Disable linking interaction for magnets marked as passive
+                return magnet.getAttribute('magnet') !== 'passive';
+            },
+            // Enable link snapping within 20px lookup radius
+            snapLinks: { radius: 20 }
         });
 
 
@@ -102,13 +123,22 @@ export class PegenGraph {
         this.pg_graph.on('add', function (cell) {
             if (cell.isLink()) {
                 var source = cell.get('source');
-                if (source.portBody.portid === 'portin') {
-                    // 这里可以确定这个链接是从id为uniquePortId1的端口开始的
-                    console.log('port in !');
-                }
+                // if (source.portBody.portid === 'portin') {
+                //     // 这里可以确定这个链接是从id为uniquePortId1的端口开始的
+                //     console.log('port in !');
+                // }
             }
         });
 
+
+        // Register events
+        this.pg_paper.on('link:mouseenter', (linkView) => {
+            this.showLinkTools(linkView);
+        });
+
+        this.pg_paper.on('link:mouseleave', (linkView) => {
+            linkView.removeTools();
+        });
 
 
         // pg_paper.on('element:mouseenter', function (elementView) {
@@ -129,7 +159,7 @@ export class PegenGraph {
             },
             attrs: {
                 portBody: {
-                    magnet: true,
+                    magnet: 'passive',
                     r: 5,
                     fill: '#023047',
                     stroke: '#023047',
@@ -219,10 +249,49 @@ export class PegenGraph {
 
         model.addTo(this.pg_graph);
 
+        model.on('mouseenter', function (cellView) {
+            cellView.model.attr('ports/items', { attrs: { circle: { visibility: 'visible' } } });
+        });
+
+        model.on('mouseleave', function (cellView) {
+            cellView.model.attr('ports/items', { attrs: { circle: { visibility: 'hidden' } } });
+        });
+
         // var elementView = model.findView(this.pg_paper);
         // elementView.addTools(this.pg_toolview);
     }
 
     // 其他方法...
+    showLinkTools(linkView) {
+        var tools = new joint.dia.ToolsView({
+            tools: [
+                new joint.linkTools.Remove({
+                    distance: '50%',
+                    markup: [{
+                        tagName: 'circle',
+                        selector: 'button',
+                        attributes: {
+                            'r': 7,
+                            'fill': '#f6f6f6',
+                            'stroke': '#ff5148',
+                            'stroke-width': 2,
+                            'cursor': 'pointer'
+                        }
+                    }, {
+                        tagName: 'path',
+                        selector: 'icon',
+                        attributes: {
+                            'd': 'M -3 -3 3 3 M -3 3 3 -3',
+                            'fill': 'none',
+                            'stroke': '#ff5148',
+                            'stroke-width': 2,
+                            'pointer-events': 'none'
+                        }
+                    }]
+                })
+            ]
+        });
+        linkView.addTools(tools);
+    }
 }
 
