@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 project(FlexDemoProject)
 
+set(CMAKE_C_COMPILER "C:/msys64/mingw64/bin/gcc.exe")
+set(CMAKE_CXX_COMPILER "C:/msys64/mingw64/bin/g++.exe")
+
 # 查找Flex和Bison
 find_package(BISON)
 find_package(FLEX)
