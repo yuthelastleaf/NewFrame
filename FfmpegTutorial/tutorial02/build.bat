@@ -1,5 +1,5 @@
 cd %~dp0
-rm -r build
+rmdir /s /q build
 mkdir build
 cd build
 cmake ../

@@ -16,16 +16,17 @@ set(X264_LIB_DIR ../../../ThirdLib/x264_install/bin)
 
 # Determine whether to use 32-bit or 64-bit SDL library
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(SDL_LIB_DIR ../../../ThirdLib/SDL2-2.30.4/lib/x64)
+    set(SDL_LIB_DIR ../../ThirdLib/SDL2-2.30.4/lib/x64)
 else()
-    set(SDL_LIB_DIR ../../../ThirdLib/SDL2-2.30.4/lib/x86)
+    set(SDL_LIB_DIR ../../ThirdLib/SDL2-2.30.4/lib/x86)
 endif()
 
 include_directories(${FFMPEG_INCLUDE_DIR})
 include_directories(${SDL_INCLUDE_DIR})
 link_directories(${FFMPEG_DEV_ROOT}/bin)
+link_directories(${SDL_LIB_DIR})
 
-add_executable(tutorial02 tutorial02.c)
+add_executable(tutorial02 tutorial02.cpp)
 
 # Specify the static libraries from FFmpeg you're linking against
 target_link_libraries(tutorial02 
@@ -37,6 +38,7 @@ target_link_libraries(tutorial02
     # Add any other FFmpeg libraries you need here
     swscale
     SDL2
+    SDL2main
 )
 
 # 在 Windows 上，复制 FFmpeg 的 DLLs 到可执行文件同一目录
@@ -50,6 +52,7 @@ if(WIN32)
         "${X264_LIB_DIR}/libx264-164.dll"
         "${FFMPEG_LIB_DIR}/swresample-5.dll"
         "${FFMPEG_LIB_DIR}/swscale-8.dll"
+        "../${SDL_LIB_DIR}/SDL2.dll"
         $<TARGET_FILE_DIR:tutorial02>)
 endif()
 
