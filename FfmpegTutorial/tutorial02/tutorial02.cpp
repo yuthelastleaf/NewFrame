@@ -3,6 +3,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/time.h>
 
 #include <SDL.h>
 #include <SDL_thread.h>
@@ -207,7 +208,7 @@ int main(int argc, char* argv[])
     }
 
     // Determine required buffer size and allocate buffer
-    numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, pCodecCtx->width, pCodecCtx->height, 1);
+    numBytes = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, pCodecCtx->width, pCodecCtx->height, 1);
     buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
     if (!buffer)
     {
@@ -221,7 +222,7 @@ int main(int argc, char* argv[])
     }
 
     // Assign appropriate parts of buffer to image planes in pFrameRGB
-    av_image_fill_arrays(pFrameRGB->data, pFrameRGB->linesize, buffer, AV_PIX_FMT_RGB24, pCodecCtx->width, pCodecCtx->height, 1);
+    av_image_fill_arrays(pFrameRGB->data, pFrameRGB->linesize, buffer, AV_PIX_FMT_YUV420P, pCodecCtx->width, pCodecCtx->height, 1);
 
     // 初始化 SDL2
     if (!initSDL(&window, &renderer, pCodecCtx->width, pCodecCtx->height)) {
@@ -246,7 +247,7 @@ int main(int argc, char* argv[])
 
     // initialize SWS context for software scaling
     sws_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt,
-                             pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_RGB24, SWS_BILINEAR,
+                             pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_YUV420P, SWS_BILINEAR,
                              NULL, NULL, NULL);
     if (!sws_ctx)
     {
@@ -259,6 +260,11 @@ int main(int argc, char* argv[])
         avformat_close_input(&pFormatCtx);
         return -1;
     }
+
+    // 获取视频流的时间基
+    AVRational time_base = pFormatCtx->streams[videoStream]->time_base;
+
+    int64_t start_time = av_gettime();
 
     // Read frames and save first five frames to disk
     int i = 0;
@@ -273,6 +279,7 @@ int main(int argc, char* argv[])
                 sws_scale(sws_ctx, (uint8_t const *const *)pFrame->data,
                           pFrame->linesize, 0, pCodecCtx->height,
                           pFrameRGB->data, pFrameRGB->linesize);
+                
 
                 // 更新 YUV 纹理
                 SDL_UpdateYUVTexture(
@@ -282,10 +289,18 @@ int main(int argc, char* argv[])
                     pFrameRGB->data[1], pFrameRGB->linesize[1],
                     pFrameRGB->data[2], pFrameRGB->linesize[2]);
 
+
                 // 渲染纹理到屏幕
                 SDL_RenderClear(renderer);
                 SDL_RenderCopy(renderer, texture, NULL, NULL);
                 SDL_RenderPresent(renderer);
+
+                // 计算当前帧的显示时间
+                int64_t pts = av_rescale_q(pFrame->pts, time_base, AVRational{ 1, AV_TIME_BASE });
+                int64_t delay = pts - (av_gettime() - start_time);
+                if (delay > 0) {
+                    av_usleep(delay);
+                }
 
                 // 处理事件（如退出）
                 SDL_Event e;
