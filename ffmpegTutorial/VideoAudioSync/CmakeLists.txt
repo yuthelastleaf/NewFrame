@@ -1,0 +1,67 @@
+cmake_minimum_required(VERSION 3.10)
+project(VideoAudioSync)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Set this to your FFmpeg include directory
+set(FFMPEG_INCLUDE_DIR ../../ThirdLib/ffmpeg_install/include)
+set(SDL_INCLUDE_DIR ../../ThirdLib/SDL2-2.30.4/include)
+
+# Set this to your FFmpeg lib directory
+set(FFMPEG_LIB_DIR ../../../ThirdLib/ffmpeg_install/bin)
+set(FFMPEG_DEV_ROOT ../../ThirdLib/ffmpeg_install)
+# Set x264 library directorys
+set(X264_LIB_DIR ../../../ThirdLib/x264_install/bin)
+
+# Determine whether to use 32-bit or 64-bit SDL library
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(SDL_LIB_DIR ../../ThirdLib/SDL2-2.30.4/lib/x64)
+else()
+    set(SDL_LIB_DIR ../../ThirdLib/SDL2-2.30.4/lib/x86)
+endif()
+
+include_directories(${FFMPEG_INCLUDE_DIR})
+include_directories(${SDL_INCLUDE_DIR})
+link_directories(${FFMPEG_DEV_ROOT}/bin)
+link_directories(${SDL_LIB_DIR})
+
+add_executable(tutorial03 tutorial03.cpp)
+
+# Specify the static libraries from FFmpeg you're linking against
+target_link_libraries(tutorial03 
+    avformat
+    avcodec
+    avutil
+    avfilter
+    swresample
+    # Add any other FFmpeg libraries you need here
+    swscale
+    SDL2
+    SDL2main
+)
+
+# 在 Windows 上，复制 FFmpeg 的 DLLs 到可执行文件同一目录
+if(WIN32)
+    add_custom_command(TARGET tutorial03 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FFMPEG_LIB_DIR}/avcodec-60.dll"
+        "${FFMPEG_LIB_DIR}/avformat-60.dll"
+        "${FFMPEG_LIB_DIR}/avutil-58.dll"
+        "${FFMPEG_LIB_DIR}/avfilter-9.dll"
+        "${X264_LIB_DIR}/libx264-164.dll"
+        "${FFMPEG_LIB_DIR}/swresample-4.dll"
+        "${FFMPEG_LIB_DIR}/swscale-7.dll"
+        "../${SDL_LIB_DIR}/SDL2.dll"
+        $<TARGET_FILE_DIR:tutorial03>)
+endif()
+
+# If you're using MSVC, you might need to suppress some warnings or set specific compiler options
+if(MSVC)
+    # 仅对 MSVC 编译器
+    target_compile_options(tutorial03 PRIVATE /W3)
+else()
+    # 对 GCC 或 Clang 等其他编译器
+    target_compile_options(tutorial03 PRIVATE -Wall -Wextra)
+endif()
+
