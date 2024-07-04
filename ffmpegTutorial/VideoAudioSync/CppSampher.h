@@ -6,7 +6,7 @@
 
 class Semaphore {
 public:
-    Semaphore(int count = 0, int maxCount = 1) : count(count), maxCount(maxCount) {}
+    Semaphore(int count = 0, int maxCount = 10000) : count(count), maxCount(maxCount) {}
 
     void signal() {
         std::unique_lock<std::mutex> lock(mutex);

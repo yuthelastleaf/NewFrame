@@ -14,6 +14,10 @@ extern "C"
 #include <SDL_thread.h>
 }
 
+#include <memory>
+
+#include "stream_parser.h"
+
 class SDLShowVideo
 {
 private:
@@ -23,14 +27,20 @@ private:
     SDL_Texture* texture_;
 
     char* video_file_;
-    AVFormatContext *video_format_ctx;
+    AVFormatContext *video_format_ctx_;
+
+    std::unique_ptr<stream_parser> video_streams_;
+    std::unique_ptr<stream_parser> audio_streams_;
 
 public:
     SDLShowVideo(/* args */);
     SDLShowVideo(char* filename);
     ~SDLShowVideo();
 
+    bool InitSDL();
     bool ReadVideoFile(char* filename);
+
+    void ShowVideo();
     
     void Start();
     void Pause();
