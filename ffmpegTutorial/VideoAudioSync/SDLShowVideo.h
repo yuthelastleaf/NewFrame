@@ -27,6 +27,7 @@ private:
     SDL_Texture* texture_;
 
     char* video_file_;
+    bool show_start_;
     AVFormatContext *video_format_ctx_;
 
     std::unique_ptr<stream_parser> video_streams_;

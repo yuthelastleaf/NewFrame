@@ -62,7 +62,28 @@ stream_parser::~stream_parser()
     }
 }
 
-void stream_parser::add_packet(AVPacket packet)
+void stream_parser::add_packet(AVPacket& packet)
 {
-    
+    semaphore_.signal(&packet);
+}
+
+AVPacket *stream_parser::get_packet(int timeout)
+{
+    AVPacket* packet = nullptr;
+    if(!timeout) {
+        packet = semaphore_.try_wait();
+    } else {
+        packet = semaphore_.timed_wait(timeout);
+    }
+    return packet;
+}
+
+AVCodecContext *stream_parser::get_codec_context()
+{
+    return stream_codec_ctx_;
+}
+
+AVCodec *stream_parser::get_codec()
+{
+    return stream_codec_;
 }
