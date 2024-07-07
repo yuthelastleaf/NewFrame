@@ -1,5 +1,7 @@
 #include "SDLShowVideo.h"
 
+#include <windows.h>
+
 
 int main(int argc, char *argv[]) {
 
@@ -10,6 +12,11 @@ int main(int argc, char *argv[]) {
     }
 
     SDLShowVideo ssv(argv[1]);
+    ssv.Start();
+
+    while (true) {
+        Sleep(10000);
+    }
 
     return 0;
 }

@@ -64,6 +64,6 @@ public:
 private:
     std::mutex mutex_;
     std::condition_variable cond_var;
-    std::queue<std::shared_ptr<T*>> resources;
+    std::queue<T*> resources;
     int maxCount;
 };

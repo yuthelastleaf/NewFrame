@@ -1,46 +1,45 @@
 #pragma once
-#include <thread>
-#include <atomic>
-#include <functional>
 #include <iostream>
+#include <thread>
+#include <condition_variable>
+#include <functional>
+#include <atomic>
 
 class ThreadManager {
 public:
-    ThreadManager() : stopFlag(false), thread(nullptr) {}
+    ThreadManager() : stop(false) {}
 
     ~ThreadManager() {
-        stop();
+        stopAll();
     }
 
-    void start(std::function<void()> task) {
-        if (thread == nullptr) {
-            stopFlag = false;
-            thread = new std::thread([this, task]() {
-                while (!stopFlag) {
-                    task();
-                }
-            });
-        } else {
-            std::cerr << "Thread already running!" << std::endl;
-        }
+    // 启动线程，执行给定的函数
+    void start(std::function<void()> func) {
+        std::thread([this, func]() {
+            func();
+        }).detach();
     }
 
-    void stop() {
-        if (thread != nullptr) {
-            stopFlag = true;
-            if (thread->joinable()) {
-                thread->join();
-            }
-            delete thread;
-            thread = nullptr;
-        }
+    // 启动线程，执行给定的类成员函数
+    template <typename T>
+    void start(T* instance, void (T::*memberFunc)()) {
+        std::thread([this, instance, memberFunc]() {
+            (instance->*memberFunc)();
+        }).detach();
     }
 
-    bool isRunning() const {
-        return thread != nullptr;
+    // 停止所有线程（仅用于示例，实际情况需要管理线程生命周期）
+    void stopAll() {
+        stop = true;
+        cv.notify_all();
+    }
+
+    // 检查是否停止
+    bool isStopped() const {
+        return stop;
     }
 
 private:
-    std::atomic<bool> stopFlag;
-    std::thread* thread;
+    std::atomic<bool> stop;
+    std::condition_variable cv;
 };

@@ -25,11 +25,15 @@ protected:
     AVCodecContext *stream_codec_ctx_;
     AVCodec *stream_codec_;
     Semaphore<AVPacket> semaphore_;
+
+public:
+    AVRational time_base_;
+    int64_t total_duration_;
 public:
     stream_parser(AVFormatContext *format_ctx, AVMediaType stream_type);
     virtual ~stream_parser();
 
-    void add_packet(AVPacket& packet);
+    void add_packet(AVPacket* packet);
     AVPacket* get_packet(int timeout = 0);
 
     AVCodecContext* get_codec_context();

@@ -1,13 +1,22 @@
 #include "stream_parser.h"
 
 stream_parser::stream_parser(AVFormatContext *format_ctx, AVMediaType stream_type)
-    : is_init_(false)
+    : is_init_(false), time_base_({0, 0}), total_duration_(0)
 {
-
+    total_duration_ = format_ctx->duration;
     for (int i = 0; i < format_ctx->nb_streams; i++)
     {
         if (format_ctx->streams[i]->codecpar->codec_type == stream_type)
         {
+            if (format_ctx->streams[i]->duration > total_duration_)
+            {
+                total_duration_ = format_ctx->streams[i]->duration;
+            }
+
+            if(is_init_) {
+                continue;
+            }
+
             int errnum;
             char errbuf[128];
             AVCodecContext *pCodecCtxOrig = avcodec_alloc_context3(NULL);
@@ -46,8 +55,9 @@ stream_parser::stream_parser(AVFormatContext *format_ctx, AVMediaType stream_typ
                 break;
             }
 
+            time_base_ = format_ctx->streams[i]->time_base;
+
             is_init_ = true;
-            break;
         }
     }
 }
@@ -62,17 +72,20 @@ stream_parser::~stream_parser()
     }
 }
 
-void stream_parser::add_packet(AVPacket& packet)
+void stream_parser::add_packet(AVPacket *packet)
 {
-    semaphore_.signal(&packet);
+    semaphore_.signal(packet);
 }
 
 AVPacket *stream_parser::get_packet(int timeout)
 {
-    AVPacket* packet = nullptr;
-    if(!timeout) {
+    AVPacket *packet = nullptr;
+    if (!timeout)
+    {
         packet = semaphore_.try_wait();
-    } else {
+    }
+    else
+    {
         packet = semaphore_.timed_wait(timeout);
     }
     return packet;

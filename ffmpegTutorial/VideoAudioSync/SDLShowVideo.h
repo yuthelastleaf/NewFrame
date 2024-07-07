@@ -17,6 +17,7 @@ extern "C"
 #include <memory>
 
 #include "stream_parser.h"
+#include "ThreadManager.h"
 
 class SDLShowVideo
 {
@@ -33,6 +34,16 @@ private:
     std::unique_ptr<stream_parser> video_streams_;
     std::unique_ptr<stream_parser> audio_streams_;
 
+    ThreadManager sync_thread_;
+
+private:
+    void CreateSyncThread();
+
+    void DispatchPacket();
+
+    void ShowVideo();
+    void ShowAudio();
+
 public:
     SDLShowVideo(/* args */);
     SDLShowVideo(char* filename);
@@ -41,7 +52,7 @@ public:
     bool InitSDL();
     bool ReadVideoFile(char* filename);
 
-    void ShowVideo();
+    
     
     void Start();
     void Pause();
